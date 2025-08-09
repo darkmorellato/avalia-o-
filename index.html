@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações de Vendas 02/08 a 08/08 </title>
+    <!-- Importando a biblioteca Chart.js para os gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos CSS para o Dashboard */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #F0F2F5; /* Fundo muito claro */
+            color: #333333; /* Texto escuro para contraste */
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            padding: 30px;
+            background-color: #E0E6F0; /* Cabeçalho claro */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2.8em;
+            color: #2C3E50; /* Título mais escuro */
+        }
+
+        .dashboard-header p {
+            font-size: 1.1em;
+            color: #555555;
+        }
+
+        .dashboard-container {
+            display: grid;
+            /* Layout agora sempre em uma única coluna para empilhar os cards */
+            grid-template-columns: 1fr; 
+            gap: 25px; /* Espaçamento entre os cards */
+            padding: 25px;
+            max-width: 1200px;
+            margin: 25px auto; /* Centraliza o container */
+        }
+
+        .card {
+            background-color: #FFFFFF; /* Fundo branco para os cards */
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #34495E; /* Título do card mais escuro */
+            border-bottom: 2px solid #BDC3C7; /* Borda mais clara */
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .full-width {
+            grid-column: 1 / -1; /* Ocupa todas as colunas disponíveis */
+        }
+
+        .chart-container {
+            flex-grow: 1;
+            position: relative;
+            height: 400px; /* Aumentado para melhor visualização */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilos para a tabela de dados */
+        #dataTable {
+            width: 100%;
+            border-collapse: separate; /* Permite border-radius nas células */
+            border-spacing: 0; /* Remove espaçamento padrão */
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden; /* Garante que o border-radius funcione */
+        }
+
+        #dataTable th, #dataTable td {
+            border: 1px solid #E0E0E0; /* Borda da tabela mais clara */
+            padding: 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        #dataTable th {
+            background-color: #DDE1E6; /* Fundo do cabeçalho da tabela claro */
+            font-weight: bold;
+            color: #444444; /* Texto do cabeçalho da tabela escuro */
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        #dataTable tbody tr:nth-child(even) {
+            background-color: #F8F8F8; /* Linhas pares mais claras */
+        }
+
+        #dataTable tbody tr:hover {
+            background-color: #EFEFEF; /* Hover mais claro */
+            cursor: pointer;
+        }
+
+        /* Estilos para responsividade */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas menores */
+                padding: 15px;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2em;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card h2 {
+                font-size: 1.4em;
+            }
+
+            .chart-container {
+                height: 320px; /* Ajuste para telas menores */
+            }
+
+            #dataTable th, #dataTable td {
+                padding: 10px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <h1>Avaliações de Vendas 02/08 a 08/08</h1>
+        <p>Análise Detalhada de Avaliações e Aproveitamento</p>
+    </header>
+
+    <main class="dashboard-container">
+        
+        <section class="card">
+            <h2>Variação de Avaliações na Semana 02/08 a 08/08</h2>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Aproveitamento de Avaliações (%)</h2>
+            <div class="chart-container">
+                <canvas id="conversionChart"></canvas>
+            </div>
+        </section>
+
+        <section class="card full-width">
+            <h2>Dados Detalhados da Semana Recente</h2>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Loja</th>
+                        <th>Avaliações Anteriores</th> <!-- Nova coluna -->
+                        <th>Avaliações Recentes</th>
+                        <th>Vendas</th>
+                        <th>Avaliações Avaliadas</th>
+                        <th>Aproveitamento (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Os dados serão preenchidos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script>
+        // Dados fornecidos pelo usuário
+        const dadosAvaliacoes = {
+            semanaAnterior: {
+                'DOM PEDRO': 369,
+                'KASSOUF': 207,
+                'PREMIUM': 202,
+                'REALME': 151,
+                'XV': 122
+            },
+            semanaRecente: {
+                'DOM PEDRO': 372,
+                'KASSOUF': 216,
+                'PREMIUM': 213,
+                'REALME': 165,
+                'XV': 124
+            }
+        };
+
+        const dadosVendas = {
+            'DOM PEDRO': { vendas: 22, avaliados: 3 },
+            'KASSOUF': { vendas: 17, avaliados: 9 }, 
+            'PREMIUM': { vendas: 20, avaliados: 11 }, 
+            'REALME': { vendas: 10, avaliados: 14 },
+            'XV': { vendas: 6, avaliados: 2 }
+        };
+
+        // Garante que o script só execute após o carregamento completo do DOM
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. GRÁFICO DE VARIAÇÃO DE AVALIAÇÕES SEMANAIS ---
+            const lojas = Object.keys(dadosAvaliacoes.semanaRecente);
+            const porcentagensVariacao = lojas.map(loja => {
+                const anterior = dadosAvaliacoes.semanaAnterior[loja];
+                const recente = dadosAvaliacoes.semanaRecente[loja];
+                // Evita divisão por zero se a semana anterior não tiver avaliações
+                const variacao = anterior > 0 ? ((recente - anterior) / anterior) * 100 : 0;
+                return variacao.toFixed(2); // Formata para 2 casas decimais
+            });
+
+            // Define cores baseadas no crescimento (verde) ou queda (vermelho)
+            const coresFundoPerformance = porcentagensVariacao.map(p => parseFloat(p) >= 0 ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)'); /* Verde e Vermelho vibrantes */
+            const coresBordaPerformance = porcentagensVariacao.map(p => parseFloat(p) >= 0 ? 'rgba(46, 204, 113, 1)' : 'rgba(231, 76, 60, 1)');
+
+            const ctxPerformance = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctxPerformance, {
+                type: 'bar', // Gráfico de barras
+                data: {
+                    labels: lojas, // Nomes das lojas
+                    datasets: [{
+                        label: '% de Variação de Avaliações (Semana)',
+                        data: porcentagensVariacao,
+                        backgroundColor: coresFundoPerformance,
+                        borderColor: coresBordaPerformance,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Permite que o gráfico se ajuste ao container
+                    scales: {
+                        y: {
+                            beginAtZero: false, // Permite que o eixo Y comece abaixo de zero para mostrar quedas
+                            title: {
+                                display: true,
+                                text: 'Variação Percentual (%)',
+                                color: '#555555', /* Cor do texto do eixo */
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            ticks: {
+                                color: '#555555', /* Cor dos rótulos do eixo */
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)' /* Linhas de grade mais claras */
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#555555', /* Cor dos rótulos do eixo */
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#555555', /* Cor da legenda */
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '%';
+                                }
+                            },
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- 2. GRÁFICO DE APROVEITAMENTO DE VENDAS ---
+            const todasAsLojas = Object.keys(dadosAvaliacoes.semanaRecente); // Usar todas as lojas
+            const aproveitamentoValores = todasAsLojas.map(loja => {
+                const dados = dadosVendas[loja];
+                // Se as vendas forem maiores que 0, calcula o aproveitamento (pode ser negativo)
+                if (dados && dados.vendas > 0) {
+                    return ((dados.avaliados / dados.vendas) * 100).toFixed(2);
+                }
+                return 0; // Retorna 0 para lojas com vendas zero ou dados incompletos
+            });
+
+            // Define cores: vermelho para valores negativos, azul para zero ou positivos
+            const coresFundoConversion = aproveitamentoValores.map(p => parseFloat(p) < 0 ? 'rgba(231, 76, 60, 0.8)' : 'rgba(52, 152, 219, 0.8)'); /* Vermelho para negativo, Azul para positivo/zero */
+            const coresBordaConversion = aproveitamentoValores.map(p => parseFloat(p) < 0 ? 'rgba(231, 76, 60, 1)' : 'rgba(52, 152, 219, 1)');
+
+            const ctxConversion = document.getElementById('conversionChart').getContext('2d');
+            new Chart(ctxConversion, {
+                type: 'bar', // Gráfico de barras
+                data: {
+                    labels: todasAsLojas, // Usar todas as lojas como rótulos
+                    datasets: [{
+                        label: 'Aproveitamento de Vendas (%)',
+                        data: aproveitamentoValores,
+                        backgroundColor: coresFundoConversion, /* Usar as novas cores condicionais */
+                        borderColor: coresBordaConversion,     /* Usar as novas cores condicionais */
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false, // Permite que o eixo Y comece abaixo de zero para mostrar valores negativos
+                            max: 100, // O aproveitamento máximo é 100%
+                            title: {
+                                display: true,
+                                text: 'Aproveitamento (%)',
+                                color: '#555555', /* Cor do texto do eixo */
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            ticks: {
+                                color: '#555555', /* Cor dos rótulos do eixo */
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#555555', /* Cor dos rótulos do eixo */
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#555555',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '%';
+                                }
+                            },
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- 3. PREENCHIMENTO DA TABELA DE DADOS DETALHADOS ---
+            const dataTableBody = document.querySelector('#dataTable tbody');
+            todasAsLojas.forEach(loja => { // Usar todas as lojas
+                const row = dataTableBody.insertRow();
+                const vendas = dadosVendas[loja].vendas;
+                const avaliados = dadosVendas[loja].avaliados; // Agora pode ser negativo
+                const avaliacoesAnteriores = dadosAvaliacoes.semanaAnterior[loja]; // Pega as avaliações da semana anterior
+
+                // Calcula o aproveitamento (pode ser negativo)
+                const aproveitamentoCalculado = (vendas > 0) ? 
+                                                 ((avaliados / vendas) * 100).toFixed(2) : '0.00';
+                
+                row.insertCell(0).textContent = loja; // Loja
+                row.insertCell(1).textContent = avaliacoesAnteriores; // Avaliações Anteriores (NOVA COLUNA)
+                row.insertCell(2).textContent = dadosAvaliacoes.semanaRecente[loja]; // Avaliações Recentes
+                row.insertCell(3).textContent = vendas; // Vendas
+                row.insertCell(4).textContent = avaliados; // Exibe o valor real (negativo ou positivo)
+                row.insertCell(5).textContent = aproveitamentoCalculado + '%'; // Exibe a porcentagem calculada
+            });
+
+        });
+    </script>
+</body>
+</html>
